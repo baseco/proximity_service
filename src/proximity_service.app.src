@@ -5,7 +5,8 @@
   {mod, { proximity_service_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    erlcloud
    ]},
   {env,[]},
   {modules, []},
