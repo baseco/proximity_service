@@ -1,6 +1,6 @@
 -module(proximity_service).
 
--export([start/1]).
+-export([start/0, start/1]).
 -export([get_env/1]).
 -export([publish_event/3]).
 -export([maybe_configure_aws/0]).
@@ -12,6 +12,14 @@
 %%====================================================================
 %% API
 %%====================================================================
+
+start() ->
+	case get_env(service_handler) of
+		undefined ->
+			ok;
+		Handler ->
+			start(Handler)
+    end.
 
 start({_M, _F} = Handler) ->
 	ok = start_sqs(Handler),
@@ -63,6 +71,6 @@ unix_timestamp() ->
 
 start_sqs(Handler) ->
 	ChildMods = [proximity_service_sqs],
-    ChildMF = {proximity_service_sqs, start_link, [Handler]},
-    _ = cuesport:start_link(?SQS_POOL_NAME, ?SQS_POOL_SIZE, ChildMods, ChildMF),
+    ChildMF = {proximity_service_sqs, start_link},
+    _ = cuesport:start_link(?SQS_POOL_NAME, ?SQS_POOL_SIZE, ChildMods, ChildMF, [Handler]),
     ok.

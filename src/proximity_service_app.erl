@@ -1,8 +1,3 @@
-%%%-------------------------------------------------------------------
-%% @doc proximity_service public API
-%% @end
-%%%-------------------------------------------------------------------
-
 -module(proximity_service_app).
 
 -behaviour(application).
@@ -15,7 +10,9 @@
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
-    proximity_service_sup:start_link().
+    Ret = proximity_service_sup:start_link(),
+    ok = proximity_service:start(),
+    Ret.
 
 %%--------------------------------------------------------------------
 stop(_State) ->
