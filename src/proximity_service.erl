@@ -72,5 +72,5 @@ unix_timestamp() ->
 start_sqs(Handler) ->
 	ChildMods = [proximity_service_sqs],
     ChildMF = {proximity_service_sqs, start_link},
-    _ = cuesport:start_link(?SQS_POOL_NAME, ?SQS_POOL_SIZE, ChildMods, ChildMF, [Handler]),
+    _ = cuesport:start_link(?SQS_POOL_NAME, ?SQS_POOL_SIZE, ChildMods, ChildMF, {for_all, [Handler]}),
     ok.
