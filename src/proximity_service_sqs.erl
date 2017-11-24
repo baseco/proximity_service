@@ -24,7 +24,7 @@ start_link(Handler) ->
 %%====================================================================
 
 init([Handler]) ->
-    ok = proximity_service:maybe_configure_aws(),
+    _ = erlcloud_aws:configure(),
     State = timer_up(#state{}),
     {ok, State#state{handler = Handler}}.
 

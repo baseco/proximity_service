@@ -3,11 +3,9 @@
 -export([start/0, start/1]).
 -export([get_env/1]).
 -export([publish_event/3]).
--export([maybe_configure_aws/0]).
 
 -define(SQS_POOL_NAME, proximity_service_sqs_pool).
 -define(SQS_POOL_SIZE, 10).
--define(AWS_PROFILE, stxbr).
 
 %%====================================================================
 %% API
@@ -34,7 +32,6 @@ get_env(Key, Default) ->
 publish_event(Topic, Event, Payload) when is_atom(Topic), is_binary(Event), is_map(Payload); is_binary(Payload) ->
 	case topic_arn_by_topic(Topic) of
 		{ok, TopicArn} ->
-			ok = maybe_configure_aws(),
 			EventData = event_data(Event, Payload),
 			_ = erlcloud_sns:publish_to_topic(TopicArn, jiffy:encode(EventData), undefined),
 			ok;
@@ -46,16 +43,6 @@ publish_event(Topic, Event, Payload) when is_atom(Topic), is_binary(Event), is_m
 topic_arn_by_topic(Topic) ->
 	Topics = get_env(topics, #{}),
 	maps:find(Topic, Topics).
-
-maybe_configure_aws() ->
-	case os:getenv("AWS_ENV") of
-		false ->
-			{ok, Conf} = erlcloud_aws:profile(?AWS_PROFILE),
-			{ok, _} = erlcloud_aws:configure(Conf),
-			ok;
-		_Val ->
-			ok
-	end.
 
 %%====================================================================
 %% Internal functions
