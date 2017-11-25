@@ -24,7 +24,6 @@ start_link(Handler) ->
 %%====================================================================
 
 init([Handler]) ->
-    _ = erlcloud_aws:configure(),
     State = timer_up(#state{}),
     {ok, State#state{handler = Handler}}.
 
@@ -70,7 +69,7 @@ handle_messages(Messages, Handler) ->
 
 handle_message(Message, Handler) ->
     Body = proplists:get_value(body, Message),
-    try 
+    try
         case get_event_data(Body) of
             EventData when is_map(EventData) ->
                 try_handle_event(EventData, Handler);
