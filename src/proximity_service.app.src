@@ -7,7 +7,8 @@
    [kernel,
     stdlib,
     erlcloud,
-    cuesport
+    cuesport,
+    jiffy
    ]},
   {env,[]},
   {modules, []},
