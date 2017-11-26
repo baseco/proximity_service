@@ -5,6 +5,10 @@
        {ref,"d82ff25baf393eb11712721fb1b881b4b9f80176"}},
   0},
  {<<"eini">>,{pkg,<<"eini">>,<<"1.2.4">>},1},
+ {<<"eredis">>,
+  {git,"git://github.com/wooga/eredis.git",
+       {ref,"ea5375ff0d58db93d13e51ef6d5d77ec6229915e"}},
+  0},
  {<<"erlcloud">>,
   {git,"https://github.com/erlcloud/erlcloud",
        {ref,"a555ad641e8c06d09bfa165955e7a9499a4ea075"}},
@@ -19,7 +23,15 @@
   {git,"https://github.com/erlang-lager/lager.git",
        {ref,"944b78d4b4dd32168659d5459b728851f373e514"}},
   0},
- {<<"lhttpc">>,{pkg,<<"lhttpc">>,<<"1.5.4">>},1}]}.
+ {<<"lhttpc">>,{pkg,<<"lhttpc">>,<<"1.5.4">>},1},
+ {<<"quickrand">>,
+  {git,"https://github.com/okeuday/quickrand.git",
+       {ref,"1c60daa4b0edcec0a6b8310443574baac962ea88"}},
+  1},
+ {<<"uuid">>,
+  {git,"https://github.com/okeuday/uuid.git",
+       {ref,"23167ed8689f656ea6765572215a40b9856d7886"}},
+  0}]}.
 [
 {pkg_hash,[
  {<<"base16">>, <<"283644E2B21BD5915ACB7178BED7851FB07C6E5749B8FAD68A53C501092176D9">>},
