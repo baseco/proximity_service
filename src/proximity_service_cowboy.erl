@@ -10,7 +10,7 @@
 start(Handler, Port) ->
 	Dispatch = cowboy_router:compile([
 		{'_', [
-			{"/", ?MODULE, [Handler]},
+			{"/event", ?MODULE, [Handler]},
 			{"/ping", ?MODULE, []}
 		]}
 	]),
@@ -31,9 +31,25 @@ init(Req, Opts) ->
 %%====================================================================
 
 handle(<<"/ping">>, Req, _Opts) ->
+    %% TODO: add healthcheck
 	cowboy_req:reply(200, #{<<"content-type">> => <<"text/plain">>}, <<"pong">>, Req);
-handle(<<"/">>, Req, Opts) ->
+handle(<<"/event">>, Req, [Handler]) ->
+    handle_event(Req, Handler).
+
+handle_event(Req, {Module, Function}) ->
 	{ok, Body, Req2} = cowboy_req:read_body(Req),
-	lager:info("Opts: ~p Body: ~p", [Opts, Body]),
-	RetReq = cowboy_req:reply(200, #{<<"content-type">> => <<"text/plain">>}, <<"Hello world!">>, Req2),
-	RetReq.
+    EventData = get_event_data(Body),
+	try
+        Module:Function(EventData),
+        cowboy_req:reply(200, #{<<"content-type">> => <<"text/plain">>}, <<"OK">>, Req2)
+    catch
+        C:R ->
+            ST = erlang:get_stacktrace(),
+            lager:error("Failed handle event data ~p error ~p ~p", [EventData, {C, R}, ST]),
+            %% Now return also 200 response on fail for delete messages from SQS
+            cowboy_req:reply(200, #{<<"content-type">> => <<"text/plain">>}, <<"OK">>, Req2)
+    end.
+
+get_event_data(Body) when is_binary(Body) ->
+    Map = jiffy:decode(Body, [return_maps]),
+    jiffy:decode(maps:get(<<"Message">>, Map), [return_maps]).
