@@ -10,7 +10,8 @@
 start(Handler, Port) ->
 	Dispatch = cowboy_router:compile([
 		{'_', [
-			{"/", ?MODULE, [Handler]}
+			{"/", ?MODULE, [Handler]},
+			{"/ping", ?MODULE, []}
 		]}
 	]),
 	{ok, _} = cowboy:start_clear(http, [{port, Port}], #{env => #{dispatch => Dispatch}}),
@@ -21,15 +22,18 @@ start(Handler, Port) ->
 %%====================================================================
 
 init(Req, Opts) ->
-	RetReq = handle(Req, Opts),
+	Path = cowboy_req:path(Req),
+	RetReq = handle(Path, Req, Opts),
 	{ok, RetReq, Opts}.
 
 %%====================================================================
 %% Internal functions
 %%====================================================================
 
-handle(Req, [ServiceHandler]) ->
+handle(<<"/ping">>, Req, _Opts) ->
+	cowboy_req:reply(200, #{<<"content-type">> => <<"text/plain">>}, <<"pong">>, Req);
+handle(<<"/">>, Req, Opts) ->
 	{ok, Body, Req2} = cowboy_req:read_body(Req),
-	lager:info("Body: ~p", [Body]),
+	lager:info("Opts: ~p Body: ~p", [Opts, Body]),
 	RetReq = cowboy_req:reply(200, #{<<"content-type">> => <<"text/plain">>}, <<"Hello world!">>, Req2),
 	RetReq.

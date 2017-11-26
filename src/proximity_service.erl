@@ -29,7 +29,7 @@ start() ->
     end.
 
 start({_M, _F} = Handler) ->
-	ok = start_sqs_or_cowboy(Handler),
+	ok = start_cowboy_and_maybe_sqs(Handler),
 	ok = start_redis(),
 	ok.
 
@@ -95,13 +95,14 @@ unix_timestamp() ->
     DateTime = calendar:universal_time(),
     calendar:datetime_to_gregorian_seconds(DateTime) - calendar:datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}}).
 
-start_sqs_or_cowboy(Handler) ->
-	case get_env(service_source_type) of
-		cowboy ->
-			start_cowboy(Handler);
-		sqs ->
-			start_sqs(Handler)
-	end.
+start_cowboy_and_maybe_sqs(Handler) ->
+    ok = start_cowboy(Handler),
+    case get_env(need_sqs, false) of
+        false ->
+            ok;
+	   true ->
+            start_sqs(Handler)
+    end.
 
 start_cowboy(Handler) ->
 	Port = get_env(service_cowboy_port, ?DEFAULT_COWBOY_PORT),
