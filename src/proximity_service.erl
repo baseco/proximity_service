@@ -14,6 +14,7 @@
 -define(REDIS_POOL_NAME, proximity_service_redis_pool).
 -define(REDIS_POOL_SIZE, 15).
 -define(REDIS_EXPIRE, 3 * 60 * 60).
+-define(DEFAULT_COWBOY_PORT, 8763).
 
 %%====================================================================
 %% API
@@ -28,7 +29,7 @@ start() ->
     end.
 
 start({_M, _F} = Handler) ->
-	ok = start_sqs(Handler),
+	ok = start_sqs_or_cowboy(Handler),
 	ok = start_redis(),
 	ok.
 
@@ -93,6 +94,18 @@ event_data(Event, Payload, System) ->
 unix_timestamp() ->
     DateTime = calendar:universal_time(),
     calendar:datetime_to_gregorian_seconds(DateTime) - calendar:datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}}).
+
+start_sqs_or_cowboy(Handler) ->
+	case get_env(service_source_type) of
+		cowboy ->
+			start_cowboy(Handler);
+		sqs ->
+			start_sqs(Handler)
+	end.
+
+start_cowboy(Handler) ->
+	Port = get_env(service_cowboy_port, ?DEFAULT_COWBOY_PORT),
+	proximity_service_cowboy:start(Handler, Port).
 
 start_sqs(Handler) ->
 	ChildMods = [proximity_service_sqs],
