@@ -117,7 +117,7 @@ start_sqs(Handler) ->
 start_redis() ->
 	ChildMods = [eredis],
     ChildMF = {eredis, start_link},
-    RedisHost = get_env(redis_host, ?REDIS_HOST),
+    RedisHost = os:getenv("REDIS_HOST", ?REDIS_HOST),
     _ = cuesport:start_link(?REDIS_POOL_NAME, ?REDIS_POOL_SIZE, ChildMods, ChildMF, {for_all, [RedisHost, ?REDIS_PORT]}),
     ok.
 
