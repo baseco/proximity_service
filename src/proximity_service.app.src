@@ -11,7 +11,8 @@
     cuesport,
     jiffy,
     eredis,
-    uuid
+    uuid,
+    cowboy
    ]},
   {env,[]},
   {modules, []},
