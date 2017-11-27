@@ -21,6 +21,7 @@
 %%====================================================================
 
 start() ->
+    ok = start_redis(),
 	case get_env(service_handler) of
 		undefined ->
 			ok;
@@ -30,7 +31,6 @@ start() ->
 
 start({_M, _F} = Handler) ->
 	ok = start_cowboy_and_maybe_sqs(Handler),
-	ok = start_redis(),
 	ok.
 
 get_env(Key) ->
@@ -100,7 +100,7 @@ start_cowboy_and_maybe_sqs(Handler) ->
     case get_env(need_sqs, false) of
         false ->
             ok;
-	   true ->
+        true ->
             start_sqs(Handler)
     end.
 
