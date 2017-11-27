@@ -1,7 +1,7 @@
 proximity_service
 =====
 
-An OTP application
+Proximity Service Application. Use for build services.
 
 Build
 -----
