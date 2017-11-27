@@ -135,7 +135,7 @@ gen_id() ->
 redis_q(Query) ->
 	try eredis:q(get_redis_worker(), Query) of
         {error, _Reason} = Error ->
-            lager:warning("Failed run redis query ~p ~p", [Query, Error]),
+            lager:error("Failed run redis query ~p ~p", [Query, Error]),
             {error, query_fail};
         Ret ->
             Ret
