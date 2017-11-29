@@ -15,6 +15,7 @@
 -define(REDIS_POOL_SIZE, 15).
 -define(REDIS_EXPIRE, 3 * 60 * 60).
 -define(DEFAULT_COWBOY_PORT, 8763).
+-define(ATTEMPTS, 3).
 
 %%====================================================================
 %% API
@@ -76,13 +77,25 @@ del_ex_data(#{<<"system">> := #{<<"ex_data_id">> := ExDataId}}) ->
 %%====================================================================
 
 publish_to_topic(Topic, EventData) ->
-	case topic_arn_by_topic(Topic) of
-		{ok, TopicArn} ->
-			_ = erlcloud_sns:publish_to_topic(TopicArn, jiffy:encode(EventData), undefined),
-			ok;
-		error ->
-			{error, not_found}
-	end.
+    case topic_arn_by_topic(Topic) of
+        {ok, TopicArn} ->
+            publish_to_topic(TopicArn, EventData, ?ATTEMPTS);
+        error ->
+            {error, not_found}
+    end.
+
+publish_to_topic(_TopicArn, EventData, Attempt) when Attempt == 0 ->
+    lager:error("Failed publish event ~p", [EventData]),
+    error;
+publish_to_topic(TopicArn, EventData, Attempt) when Attempt > 0 ->
+    try
+        _ = erlcloud_sns:publish_to_topic(TopicArn, jiffy:encode(EventData), undefined),
+        ok
+    catch
+        error:{sns_error, _} = Error ->
+            lager:warning("SNS error ~p, attempt ~p, try again", [Attempt, Error]),
+            publish_to_topic(TopicArn, EventData, Attempt - 1)
+    end.
 
 event_data(Event, Payload) ->
 	event_data(Event, Payload, #{}).
