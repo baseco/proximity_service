@@ -92,6 +92,9 @@ publish_to_topic(TopicArn, EventData, Attempt) when Attempt > 0 ->
         _ = erlcloud_sns:publish_to_topic(TopicArn, jiffy:encode(EventData), undefined),
         ok
     catch
+        error:{sns_error, _, _} = Error ->
+            lager:warning("SNS error ~p, attempt ~p, try again", [Attempt, Error]),
+            publish_to_topic(TopicArn, EventData, Attempt - 1);
         error:{sns_error, _} = Error ->
             lager:warning("SNS error ~p, attempt ~p, try again", [Attempt, Error]),
             publish_to_topic(TopicArn, EventData, Attempt - 1)
